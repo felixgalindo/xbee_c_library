@@ -1,0 +1,20 @@
+<map id="include/xbee_cellular.h" name="include/xbee_cellular.h">
+<area shape="rect" id="Node000001" title="Header for XBee 3 Cellular API." alt="" coords="303,5,474,31"/>
+<area shape="rect" id="Node000002" href="$xbee_8h.html" title="Header file for the XBee class." alt="" coords="182,79,249,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="362,33,257,76,255,71,360,28"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="256,299,327,324"/>
+<area shape="poly" id="edge10_Node000001_Node000003" title=" " alt="" coords="390,31,375,125,359,189,336,252,312,290,308,287,331,249,354,187,370,124,385,31"/>
+<area shape="rect" id="Node000008" title=" " alt="" coords="426,79,501,104"/>
+<area shape="poly" id="edge9_Node000001_Node000008" title=" " alt="" coords="402,29,443,67,439,71,399,33"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="182,97,121,102,57,116,32,126,15,140,8,156,15,176,36,203,62,227,92,247,123,263,187,287,243,300,242,305,185,292,121,268,89,251,59,231,32,207,10,179,3,156,10,136,29,122,56,111,121,97,181,91"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="25,152,107,177"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="192,106,104,148,101,144,190,102"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="132,152,203,177"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="209,106,185,142,180,139,205,103"/>
+<area shape="rect" id="Node000006" href="$config_8h.html" title="Define library configurations." alt="" coords="227,152,300,177"/>
+<area shape="poly" id="edge5_Node000002_Node000006" title=" " alt="" coords="225,103,250,139,246,142,221,106"/>
+<area shape="rect" id="Node000007" href="$port_8h.html" title="Platform&#45;specific abstraction layer for hardware interfaces." alt="" coords="261,225,321,251"/>
+<area shape="poly" id="edge8_Node000002_Node000007" title=" " alt="" coords="250,101,285,120,302,134,315,151,320,167,319,183,309,214,304,212,314,182,315,167,310,153,298,137,282,124,247,106"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="270,177,284,212,279,214,265,179"/>
+<area shape="poly" id="edge7_Node000007_Node000003" title=" " alt="" coords="294,251,294,285,289,285,289,251"/>
+</map>

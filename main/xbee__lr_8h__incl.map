@@ -1,0 +1,18 @@
+<map id="include/xbee_lr.h" name="include/xbee_lr.h">
+<area shape="rect" id="Node000001" title="Header file for the XBee LR (LoRaWAN) subclass." alt="" coords="175,5,307,31"/>
+<area shape="rect" id="Node000002" href="$xbee_8h.html" title="Header file for the XBee class." alt="" coords="173,79,240,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="238,32,220,67,216,65,233,30"/>
+<area shape="rect" id="Node000006" href="$config_8h.html" title="Define library configurations." alt="" coords="282,152,355,177"/>
+<area shape="poly" id="edge9_Node000001_Node000006" title=" " alt="" coords="250,30,308,139,303,141,245,32"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="82,299,152,324"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="173,95,135,98,92,107,51,124,33,137,18,153,10,171,9,189,15,208,25,226,56,261,90,288,87,293,53,265,21,229,10,210,4,190,4,170,13,151,29,133,48,120,90,102,134,92,172,89"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="28,152,110,177"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="185,106,105,148,102,143,183,102"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="135,152,206,177"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="203,106,185,141,180,138,198,103"/>
+<area shape="poly" id="edge5_Node000002_Node000006" title=" " alt="" coords="226,102,290,142,287,147,223,106"/>
+<area shape="rect" id="Node000007" href="$port_8h.html" title="Platform&#45;specific abstraction layer for hardware interfaces." alt="" coords="214,225,274,251"/>
+<area shape="poly" id="edge8_Node000002_Node000007" title=" " alt="" coords="212,104,240,211,235,213,207,105"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="308,179,268,218,264,214,304,175"/>
+<area shape="poly" id="edge7_Node000007_Node000003" title=" " alt="" coords="225,253,151,294,148,289,222,248"/>
+</map>

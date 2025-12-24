@@ -1,0 +1,9 @@
+<map id="include/xbee_cellular.h" name="include/xbee_cellular.h">
+<area shape="rect" id="Node000001" title="Header for XBee 3 Cellular API." alt="" coords="213,5,383,31"/>
+<area shape="rect" id="Node000002" href="$xbee__cellular__http__get__example_8c.html" title="Example application demonstrating the use of the XBeeCellular driver." alt="" coords="5,79,183,133"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="259,39,157,81,155,76,257,34"/>
+<area shape="rect" id="Node000003" href="$xbee__cellular__udp__echo__example_8c.html" title="Sends a UDP datagram to Digi’s public echo server (52.43.121.77:10001) and prints the echoed payload ..." alt="" coords="207,79,389,133"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="301,44,301,79,295,79,295,44"/>
+<area shape="rect" id="Node000004" href="$xbee__cellular_8c.html" title="Implementation of XBee 3 Cellular subclass." alt="" coords="413,93,556,119"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="336,34,460,91,458,95,334,39"/>
+</map>
