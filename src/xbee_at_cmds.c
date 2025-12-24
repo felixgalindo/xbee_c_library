@@ -56,7 +56,8 @@
          case AT_AP: return "AP";            ///< API Enable
          case AT_BD: return "BD";            ///< Baud Rate
          case AT_WR: return "WR";            ///< Write to non-volatile memory
-         case AT_RE: return "RE";            ///< Restore factory defaults
+         case AT_RE: return "RE";            ///< Soft Reset
+         case AT_FR: return "FR";            ///< Factory Reset
          case AT_VR: return "VR";            ///< Firmware Version
          case AT_AC: return "AC";            ///< Apply Changes
          case AT_NR: return "NR";            ///< Network Reset
@@ -110,6 +111,8 @@
          case AT_JV: return "JV";            ///< Channel Verification
          case AT_LD: return "LD";            ///< Node Discovery Time
          case AT_AO: return "AO";            ///< API Options
+         case AT_HV: return "HV";            ///< Hardware Version
+
  
          /**< XBee 3 RF Specific AT Commands */
          case AT_CE: return "CE";            ///< Coordinator Enable
@@ -132,7 +135,11 @@
          case AT_UK: return "UK";            ///< Unlock Password
          case AT_VE: return "VE";            ///< Voltage Supply
          case AT_VL: return "VL";            ///< Cellular Module Version
- 
+         case AT_PN: return "PN";     ///< SIM PIN
+         case AT_AN: return "AN";     ///< APN
+         case AT_CP: return "CP";     ///< Carrier Profile
+         case AT_SD: return "SD";     ///< Shutdown
+        
          /**< XBee LR Specific AT Commands */
          case AT_DE: return "DE";            ///< LoRaWAN Device EUI
          case AT_AK: return "AK";            ///< LoRaWAN Application Key

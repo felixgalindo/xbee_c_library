@@ -51,3 +51,9 @@ Thumbs.db
 
 #Ignore object files
 *.o
+
+#Ignore build files
+build/
+
+#Ignore docs
+docs/

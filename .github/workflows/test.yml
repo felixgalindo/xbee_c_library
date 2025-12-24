@@ -1,0 +1,26 @@
+name: Ceedling Unit Tests
+
+on:
+  push:
+    branches: ['**']       # Match all branches
+  pull_request:
+    branches: ['**']       # Match PRs from any source branch
+
+jobs:
+  ceedling-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: 3.1
+
+      - name: Install Ceedling
+        run: gem install ceedling
+
+      - name: Run Tests
+        run: ceedling test:all

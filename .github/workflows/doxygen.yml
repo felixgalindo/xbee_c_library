@@ -1,0 +1,75 @@
+# .github/workflows/doxygen.yml
+name: Doxygen Docs
+
+# ───────────────────────────────
+# ➊ Run on every push (any branch / tag) and on every PR
+# ───────────────────────────────
+on:
+  push:
+    branches: ["**"]            # “**”  means *all* branches & tags
+  pull_request:                 # keeps lint / warnings visible in PRs
+
+# ───────────────────────────────
+# ➋ The workflow needs to push to gh-pages
+#    so we grant the default token “contents: write”
+# ───────────────────────────────
+permissions:
+  contents: write               # required by peaceiris/actions-gh-pages
+
+jobs:
+  docs:
+    runs-on: ubuntu-latest
+
+    steps:
+    # ───────────────────────────
+    # Check out the current commit
+    # ───────────────────────────
+    - name: Checkout source
+      uses: actions/checkout@v4
+
+    # ───────────────────────────
+    # Install Doxygen + Graphviz
+    # ───────────────────────────
+    - name: Install Doxygen & Graphviz
+      run: |
+        sudo apt-get update -y
+        sudo apt-get install -y doxygen graphviz
+
+    # ───────────────────────────
+    # Build the manual – assumes your “Doxyfile” puts
+    # everything inside   docs/html/
+    # ───────────────────────────
+    - name: Generate documentation
+      run: doxygen Doxyfile
+
+    # ───────────────────────────
+    # Turn the branch / tag name into something
+    # safe for file-systems (slash → underscore)
+    # ───────────────────────────
+    - name: Compute safe name
+      id: ref
+      run: echo "SAFE_NAME=${GITHUB_REF_NAME//\//_}" >> "$GITHUB_OUTPUT"
+
+    # ───────────────────────────
+    # Upload the HTML as a workflow artefact
+    # (handy for PRs – click “Artifacts”)
+    # ───────────────────────────
+    - name: Upload artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: docs-${{ steps.ref.outputs.SAFE_NAME }}
+        path: docs/html
+        retention-days: 14        # keep for two weeks (optional)
+
+    # ───────────────────────────
+    # Deploy **only on pushes** (not on PR builds)
+    # to   gh-pages/<branch-or-tag-name>/
+    # ───────────────────────────
+    - name: Deploy to GitHub Pages
+      if: github.event_name == 'push'
+      uses: peaceiris/actions-gh-pages@v4
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_branch: gh-pages
+        publish_dir: docs/html
+        destination_dir: ${{ steps.ref.outputs.SAFE_NAME }}

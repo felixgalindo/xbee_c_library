@@ -95,6 +95,9 @@
  bool XBeeLRSetRX2Frequency(XBee* self, const uint32_t value);
  bool XBeeLRSetTransmitPower(XBee* self, const uint8_t value);
  bool XBeeLRSetChannelsMask(XBee* self, const char* value);
+ bool XBeeLRInit(XBee* self, uint32_t baudRate, void* device);
+ bool XBeeLRConnected(XBee* self);
+ uint8_t XBeeLRSendPacket(XBee* self, const void* data);
  
  #if defined(__cplusplus)
  }

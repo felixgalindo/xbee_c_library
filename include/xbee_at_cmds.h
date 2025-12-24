@@ -60,7 +60,8 @@ typedef enum {
     AT_AP,   /**< API Enable */
     AT_BD,   /**< Baud Rate */
     AT_WR,   /**< Write to non-volatile memory */
-    AT_RE,   /**< Restore factory defaults */
+    AT_RE,   /**< Soft Reset */
+    AT_FR,   /**< Factory Reset */
     AT_VR,   /**< Firmware Version */
     AT_AC,   /**< Apply Changes */
     AT_NR,   /**< Network Reset */
@@ -114,7 +115,9 @@ typedef enum {
     AT_JV,   /**< Channel Verification */
     AT_LD,   /**< Node Discovery Time */
     AT_AO,   /**< API Options */
-
+    AT_HV,   /**< Hardware Version */
+    //@todo: move xbee familiar specific commands to their own file
+    
     /**< XBee 3 RF Specific AT Commands */
     AT_CE,   /**< Coordinator Enable */
     AT_SE,   /**< Source Endpoint */
@@ -136,6 +139,11 @@ typedef enum {
     AT_UK,   /**< Unlock Password */
     AT_VE,   /**< Voltage Supply */
     AT_VL,   /**< Cellular Module Version */
+    AT_SD,   /**< Start Data Session (Cellular specific) */
+    AT_PN,   /**< SIM PIN */
+    AT_AN,   /**< Access Point Name (APN) */
+    AT_CP,    /**< Carrier Profile */
+
 
     /**< XBee LR Specific AT Commands */
     AT_DE,   /**< LoRaWAN Device EUI */

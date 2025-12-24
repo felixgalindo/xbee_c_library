@@ -46,7 +46,7 @@
  #include "xbee.h"
  #include "config.h"
  
- #define XBEE_MAX_FRAME_DATA_SIZE 256
+ #define XBEE_MAX_FRAME_DATA_SIZE 1024 //@todo: Dynamic size based on api frame length
  #define API_SEND_SUCCESS 0
  #define API_SEND_ERROR_TIMEOUT -1
  #define API_SEND_ERROR_INVALID_COMMAND -2
@@ -54,6 +54,8 @@
  #define API_SEND_ERROR_FRAME_TOO_LARGE -4
  #define API_SEND_AT_CMD_ERROR -5
  #define API_SEND_AT_CMD_RESONSE_TIMEOUT -6
+ #define API_RECEIVE_ERROR_NULL_FRAME -7              
+ #define API_SEND_ERROR_BUFFER_TOO_SMALL -8           
  
  /**
   * @enum xbee_deliveryStatus_t
@@ -205,7 +207,9 @@
      XBEE_API_TYPE_MODEM_STATUS = 0x8A,             ///< Frame for modem status reports
      XBEE_API_TYPE_AT_RESPONSE = 0x88,              ///< Frame for receiving AT command responses
      XBEE_API_TYPE_TX_STATUS = 0x89,                ///< Frame for delivery status reports
- 
+    
+     //@todo: Move XBee specific API frames to their respective modules
+     
      /**< XBee LR Specific API Frames */
      XBEE_API_TYPE_LR_JOIN_REQUEST = 0x14,          ///< Frame for LoRaWAN join requests
      XBEE_API_TYPE_LR_TX_REQUEST = 0x50,            ///< Frame for transmitting data in LoRaWAN
@@ -223,6 +227,22 @@
      XBEE_API_TYPE_CELLULAR_TX_IPV4 = 0x20,         ///< Frame for transmitting IPv4 data (XBee Cellular)
      XBEE_API_TYPE_CELLULAR_RX_IPV4 = 0xB0,         ///< Frame for receiving IPv4 data (XBee Cellular)
      XBEE_API_TYPE_CELLULAR_MODEM_STATUS = 0x8A,    ///< Frame for cellular modem status (XBee Cellular)
+     XBEE_API_TYPE_CELLULAR_SOCKET_CREATE = 0x40,   ///< Frame to create a socket
+     XBEE_API_TYPE_CELLULAR_SOCKET_OPTION = 0x41,   ///< Frame to set socket options
+     XBEE_API_TYPE_CELLULAR_SOCKET_CONNECT = 0x42,  ///< Frame to connect a socket
+     XBEE_API_TYPE_CELLULAR_SOCKET_CLOSE = 0x43,    ///< Frame to close a socket
+     XBEE_API_TYPE_CELLULAR_SOCKET_SEND = 0x44,     ///< Frame to send socket data
+     XBEE_API_TYPE_CELLULAR_SOCKET_SEND_TO = 0x45,  ///< Frame to send UDP data to a specific address
+     XBEE_API_TYPE_CELLULAR_SOCKET_BIND = 0x46,     ///< Frame to bind a socket to a local port
+     XBEE_API_TYPE_CELLULAR_SOCKET_CREATE_RESPONSE = 0xC0, ///< Response to socket create
+     XBEE_API_TYPE_CELLULAR_SOCKET_OPTION_RESPONSE = 0xC1, ///< Response to socket option
+     XBEE_API_TYPE_CELLULAR_SOCKET_CONNECT_RESPONSE = 0xC2, ///< Response to socket connect
+     XBEE_API_TYPE_CELLULAR_SOCKET_CLOSE_RESPONSE = 0xC3, ///< Response to socket close
+     XBEE_API_TYPE_CELLULAR_SOCKET_BIND_RESPONSE = 0xC6, ///< Response to socket bind
+
+     XBEE_API_TYPE_CELLULAR_SOCKET_RX = 0xCD,       ///< Frame for receiving data
+     XBEE_API_TYPE_CELLULAR_SOCKET_RX_FROM = 0xCE,  ///< Frame for receiving UDP data with source
+     XBEE_API_TYPE_CELLULAR_SOCKET_STATUS = 0xCF, ///< Frame for socket status
  
      /**< XBee GPIO/ADC Related API Frames */
      XBEE_API_TYPE_IO_DATA_SAMPLE_RX = 0x92,        ///< Frame for receiving IO data samples (GPIO/ADC)
@@ -309,7 +329,7 @@
  int apiSendAtCommand(XBee* self,at_command_t command, const uint8_t *parameter, uint8_t paramLength);
  int apiSendFrame(XBee* self,uint8_t frame_type, const uint8_t *data, uint16_t len);
  int apiSendAtCommandAndGetResponse(XBee* self, at_command_t command, const uint8_t *parameter, 
-     uint8_t paramLength, uint8_t *responseBuffer, uint8_t *responseLength, uint32_t timeoutMs);
+     uint8_t paramLength, uint8_t *responseBuffer, uint8_t *responseLength, uint32_t timeoutMs, uint16_t responseBufferSize);
  void apiHandleFrame(XBee* self,xbee_api_frame_t frame);
  void xbeeHandleAtResponse(XBee* self,xbee_api_frame_t *frame);
  void xbeeHandleModemStatus(XBee* self,xbee_api_frame_t *frame);

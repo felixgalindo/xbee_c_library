@@ -63,7 +63,7 @@
      int status;
  
      // Send the AT_JS command to query the Join Status
-     status = apiSendAtCommandAndGetResponse(self, AT_JS, NULL, 0, &response, &responseLength, 5000);
+     status = apiSendAtCommandAndGetResponse(self, AT_JS, NULL, 0, &response, &responseLength, 5000, sizeof(response));
  
      if (status == API_SEND_SUCCESS) {
          // Print the received reponse
@@ -122,37 +122,42 @@
   * @brief Attempts to connect to the LoRaWAN network using the XBee LR module.
   * 
   * This function initiates the connection process to a LoRaWAN network by sending 
-  * a join request. The function is currently blocking, meaning it waits until 
-  * the connection attempt is completed before returning. A future enhancement (@todo) 
-  * could add support for non-blocking operation.
+  * a join request. The function supports both blocking and non-blocking operation.
+  * If `blocking` is true, it waits until the connection attempt is completed or times out.
+  * If `blocking` is false, the function returns immediately after initiating the join.
   * 
   * @param[in] self Pointer to the XBee instance.
+  * @param[in] blocking If true, waits until join completes or times out. Otherwise returns immediately.
   * 
-  * @return bool Returns true if the connection process was initiated
-  * 
+  * @return bool Returns true if the connection was successful (in blocking mode) 
+  *         or if the request was initiated (in non-blocking mode).
   */
- bool XBeeLRConnect(XBee* self) {
-     // Implement XBeeLR specific connection logic 
-     XBEEDebugPrint("Join Request Sent...\n");
-     SendJoinReqApiFrame(self);
- 
-     // Start the timeout timer
-     uint32_t startTime = portMillis();
- 
-     //Delay until CONNECTION_TIMEOUT_MS Time has elapsed
-     while((portMillis() - startTime) < CONNECTION_TIMEOUT_MS){}
- 
-     XBEEDebugPrint("Checking Join Status...\n");
-     //Check Join Status only once per Join Request
-     if (XBeeLRConnected(self)) {
-         XBEEDebugPrint("Successfully Joined\n");
-         return true; // Successfully joined
-     }
- 
-     portDelay(500); // Delay between checks 
-     XBEEDebugPrint("Failed to Join\n");
-     return false; // Timeout reached without successful join
- }
+bool XBeeLRConnect(XBee* self, bool blocking) {
+    XBEEDebugPrint("Join Request Sent...\n");
+    SendJoinReqApiFrame(self);
+
+    if (!blocking) {
+        return true; // Return immediately in non-blocking mode
+    }
+
+    // Start the timeout timer
+    uint32_t startTime = portMillis();
+
+    // Delay until CONNECTION_TIMEOUT_MS time has elapsed
+    while ((portMillis() - startTime) < CONNECTION_TIMEOUT_MS) {}
+
+    XBEEDebugPrint("Checking Join Status...\n");
+
+    // Check Join Status only once per Join Request
+    if (XBeeLRConnected(self)) {
+        XBEEDebugPrint("Successfully Joined\n");
+        return true; // Successfully joined
+    }
+
+    portDelay(500); // Delay between checks
+    XBEEDebugPrint("Failed to Join\n");
+    return false; // Timeout reached without successful join
+}
  
  /**
   * @brief Disconnects from the LoRaWAN network using the XBee LR module.
@@ -167,6 +172,7 @@
   */
  bool XBeeLRDisconnect(XBee* self) {
      // Implement XBeeLR specific disconnection logic
+     (void) self;
      return true;
  }
  
@@ -183,7 +189,7 @@
   * @return xbee_deliveryStatus_t, 0 if successful
   * 
   */
- uint8_t XBeeLRSendData(XBee* self, const void* data) {
+ uint8_t XBeeLRSendPacket(XBee* self, const void* data) {
      // Prepare and send the API frame
      XBeeLRPacket_t *packet = (XBeeLRPacket_t*) data;
      uint8_t frame_data[128];  // Adjust size as needed
@@ -228,10 +234,12 @@
  
  bool XBeeLRSoftReset(XBee* self) {
      // Implement XBeeLR specific soft reset logic
+     (void) self;
      return true;
  }
  
  void XBeeLRHardReset(XBee* self) {
+    (void) self;
      // Implement XBeeLR specific hard reset logic
  }
  
@@ -265,7 +273,7 @@
          return false;
      }
      
-     int status = apiSendAtCommandAndGetResponse(self, AT_AE, param, sizeof(param), response, &responseLength, 5000);
+     int status = apiSendAtCommandAndGetResponse(self, AT_AE, param, sizeof(param), response, &responseLength, 5000, sizeof(response));
      if (status != API_SEND_SUCCESS) {
          XBEEDebugPrint("Failed to set App EUI\n");
          return false;
@@ -301,7 +309,7 @@
          return false;
      }
      
-     int status = apiSendAtCommandAndGetResponse(self, AT_AK, param, sizeof(param), response, &responseLength, 5000);
+     int status = apiSendAtCommandAndGetResponse(self, AT_AK, param, sizeof(param), response, &responseLength, 5000, sizeof(response));
      if (status != API_SEND_SUCCESS) {
          XBEEDebugPrint("Failed to set App Key\n");
          return false;
@@ -338,7 +346,7 @@
          return false;
      }
      
-     int status = apiSendAtCommandAndGetResponse(self, AT_NK, param, sizeof(param), response, &responseLength, 5000);
+     int status = apiSendAtCommandAndGetResponse(self, AT_NK, param, sizeof(param), response, &responseLength, 5000, sizeof(response));
      if (status != API_SEND_SUCCESS) {
          XBEEDebugPrint("Failed to set Nwk Key\n");
          return false;
@@ -363,7 +371,7 @@
  bool XBeeLRSetClass(XBee* self, const char value) {
      uint8_t response[33];
      uint8_t responseLength;
-     int status = apiSendAtCommandAndGetResponse(self, AT_LC, (const uint8_t *) &value, 1, response, &responseLength, 5000);
+     int status = apiSendAtCommandAndGetResponse(self, AT_LC, (const uint8_t *) &value, 1, response, &responseLength, 5000, sizeof(response));
      if(status != API_SEND_SUCCESS){
          XBEEDebugPrint("Failed to set Class\n");
          return false;
@@ -383,7 +391,7 @@
      uint8_t response[33];
      uint8_t responseLength;
  
-     int status = apiSendAtCommandAndGetResponse(self, AT_AM, &value, 1, response, &responseLength, 5000);
+     int status = apiSendAtCommandAndGetResponse(self, AT_AM, &value, 1, response, &responseLength, 5000, sizeof(response));
  
      if (status != API_SEND_SUCCESS) {
          XBEEDebugPrint("Failed to set Activation Mode\n");
@@ -405,7 +413,7 @@
      uint8_t response[33];
      uint8_t responseLength;
  
-     int status = apiSendAtCommandAndGetResponse(self, AT_AD, &value, 1, response, &responseLength, 5000);
+     int status = apiSendAtCommandAndGetResponse(self, AT_AD, &value, 1, response, &responseLength, 5000, sizeof(response));
  
      if (status != API_SEND_SUCCESS) {
          XBEEDebugPrint("Failed to set ADR\n");
@@ -427,7 +435,7 @@
      uint8_t response[33];
      uint8_t responseLength;
  
-     int status = apiSendAtCommandAndGetResponse(self, AT_DR, &value, 1, response, &responseLength, 5000);
+     int status = apiSendAtCommandAndGetResponse(self, AT_DR, &value, 1, response, &responseLength, 5000, sizeof(response));
  
      if (status != API_SEND_SUCCESS) {
          XBEEDebugPrint("Failed to set DataRate\n");
@@ -449,7 +457,7 @@
      uint8_t response[33];
      uint8_t responseLength;
  
-     int status = apiSendAtCommandAndGetResponse(self, AT_LR, &value, 1, response, &responseLength, 5000);
+     int status = apiSendAtCommandAndGetResponse(self, AT_LR, &value, 1, response, &responseLength, 5000, sizeof(response));
  
      if (status != API_SEND_SUCCESS) {
          XBEEDebugPrint("Failed to set Region\n");
@@ -471,7 +479,7 @@
      uint8_t response[33];
      uint8_t responseLength;
  
-     int status = apiSendAtCommandAndGetResponse(self, AT_DC, &value, 1, response, &responseLength, 5000);
+     int status = apiSendAtCommandAndGetResponse(self, AT_DC, &value, 1, response, &responseLength, 5000,sizeof(response));
  
      if (status != API_SEND_SUCCESS) {
          XBEEDebugPrint("Failed to set Duty Cycle\n");
@@ -517,7 +525,7 @@
      uint8_t responseLength;
      uint8_t paramLength = sizeof(value);
  
-     int status = apiSendAtCommandAndGetResponse(self, AT_J1,(const uint8_t*)&value, paramLength, response, &responseLength, 5000);
+     int status = apiSendAtCommandAndGetResponse(self, AT_J1,(const uint8_t*)&value, paramLength, response, &responseLength, 5000, sizeof(response));
  
      if (status != API_SEND_SUCCESS) {
          XBEEDebugPrint("Failed to set Join RX1 Delay\n");
@@ -540,7 +548,7 @@
      uint8_t responseLength;
      uint8_t paramLength = sizeof(value);
  
-     int status = apiSendAtCommandAndGetResponse(self, AT_J2, (const uint8_t*)&value, paramLength, response, &responseLength, 5000);
+     int status = apiSendAtCommandAndGetResponse(self, AT_J2, (const uint8_t*)&value, paramLength, response, &responseLength, 5000, sizeof(response));
  
      if (status != API_SEND_SUCCESS) {
          XBEEDebugPrint("Failed to set Join RX2 Delay\n");
@@ -563,7 +571,7 @@
      uint8_t responseLength;
      uint8_t paramLength = sizeof(value);
  
-     int status = apiSendAtCommandAndGetResponse(self, AT_D1, (const uint8_t*)&value, paramLength, response, &responseLength, 5000);
+     int status = apiSendAtCommandAndGetResponse(self, AT_D1, (const uint8_t*)&value, paramLength, response, &responseLength, 5000, sizeof(response));
  
      if (status != API_SEND_SUCCESS) {
          XBEEDebugPrint("Failed to set RX1 Delay\n");
@@ -586,7 +594,7 @@
      uint8_t responseLength;
      uint8_t paramLength = sizeof(value);
  
-     int status = apiSendAtCommandAndGetResponse(self, AT_D2, (const uint8_t*)&value, paramLength, response, &responseLength, 5000);
+     int status = apiSendAtCommandAndGetResponse(self, AT_D2, (const uint8_t*)&value, paramLength, response, &responseLength, 5000, sizeof(response));
  
      if (status != API_SEND_SUCCESS) {
          XBEEDebugPrint("Failed to set RX2 Delay\n");
@@ -609,7 +617,7 @@
      uint8_t responseLength;
      uint8_t paramLength = sizeof(value);
  
-     int status = apiSendAtCommandAndGetResponse(self,AT_XD, (const uint8_t*)&value, paramLength, response, &responseLength, 5000);
+     int status = apiSendAtCommandAndGetResponse(self,AT_XD, (const uint8_t*)&value, paramLength, response, &responseLength, 5000, sizeof(response));
  
      if (status != API_SEND_SUCCESS) {
          XBEEDebugPrint("Failed to set RX2 Data Rate\n");
@@ -632,7 +640,7 @@
      uint8_t responseLength;
      uint8_t paramLength = sizeof(value);
  
-     int status = apiSendAtCommandAndGetResponse(self, AT_XF, (const uint8_t*)&value, paramLength, response, &responseLength, 5000);
+     int status = apiSendAtCommandAndGetResponse(self, AT_XF, (const uint8_t*)&value, paramLength, response, &responseLength, 5000, sizeof(response));
  
      if (status != API_SEND_SUCCESS) {
          XBEEDebugPrint("Failed to set RX2 Frequency\n");
@@ -655,7 +663,7 @@
      uint8_t responseLength;
      uint8_t paramLength = sizeof(value);
  
-     int status = apiSendAtCommandAndGetResponse(self, AT_PO, (const uint8_t*)&value, paramLength, response, &responseLength, 5000);
+     int status = apiSendAtCommandAndGetResponse(self, AT_PO, (const uint8_t*)&value, paramLength, response, &responseLength, 5000, sizeof(response));
  
      if (status != API_SEND_SUCCESS) {
          XBEEDebugPrint("Failed to set Transmit Power\n");
@@ -690,7 +698,7 @@
      // Send the AT_DE command to query the DevEUI
      uint8_t rawResponse[8]; // DevEUI is 8 bytes in binary
      uint8_t responseLength;
-     int status = apiSendAtCommandAndGetResponse(self, AT_DE, NULL, 0, rawResponse, &responseLength, 5000);
+     int status = apiSendAtCommandAndGetResponse(self, AT_DE, NULL, 0, rawResponse, &responseLength, 5000, sizeof(rawResponse));
  
      if (status != API_SEND_SUCCESS || responseLength != 8) {
          XBEEDebugPrint("Failed to receive valid AT_DE response, error code: %d\n", status);
@@ -734,7 +742,7 @@
          return false;
      }
      
-     int status = apiSendAtCommandAndGetResponse(self, AT_CM, param, paramLength, response, &responseLength, 5000);
+     int status = apiSendAtCommandAndGetResponse(self, AT_CM, param, paramLength, response, &responseLength, 5000, sizeof(response));
      if (status != API_SEND_SUCCESS) {
          XBEEDebugPrint("Failed to set Channels Mask\n");
          return false;
@@ -855,7 +863,7 @@
      .process = XBeeLRProcess,
      .connect = XBeeLRConnect,
      .disconnect = XBeeLRDisconnect,
-     .sendData = XBeeLRSendData,
+     .sendData = XBeeLRSendPacket,
      .softReset = XBeeLRSoftReset,
      .hardReset = XBeeLRHardReset,
      .connected = XBeeLRConnected,

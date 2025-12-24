@@ -110,7 +110,7 @@
      APIFrameDebugPrint("\n");
  
      // Measure the time taken to send the frame
-     uint32_t startTime = portMillis();
+     uint32_t startTime = self->htable->PortMillis();
      int totalBytesWritten = 0;
  
      while (totalBytesWritten < frameLength) {
@@ -122,15 +122,15 @@
          totalBytesWritten += bytes_written;
  
          // Check for timeout
-         if ((portMillis() - startTime) > UART_WRITE_TIMEOUT_MS) {
-             APIFrameDebugPrint("Error: Frame sending timeout after %lu ms\n", portMillis() - startTime);
+         if ((self->htable->PortMillis() - startTime) > UART_WRITE_TIMEOUT_MS) {
+             APIFrameDebugPrint("Error: Frame sending timeout after %lu ms\n", self->htable->PortMillis() - startTime);
              return API_SEND_ERROR_UART_FAILURE;
          }
-         portDelay(1);
+         self->htable->PortDelay(1);
      }
  
  #if API_FRAME_DEBUG_PRINT_ENABLED
-     uint32_t elapsed_time = portMillis() - startTime;
+     uint32_t elapsed_time = self->htable->PortMillis() - startTime;
  #endif
      APIFrameDebugPrint("UART write completed in %lu ms\n", elapsed_time);
  
@@ -220,7 +220,7 @@
  static api_receive_status_t readBytesWithTimeout(XBee* self, uint8_t* buffer, int length, uint32_t timeoutMs) {
      int totalBytesReceived = 0;
      int bytes_received = 0;
-     uint32_t startTime = portMillis();
+     uint32_t startTime = self->htable->PortMillis();
  
      while (totalBytesReceived < length) {
          bytes_received = self->htable->PortUartRead(buffer + totalBytesReceived, length - totalBytesReceived);
@@ -230,10 +230,10 @@
          }
  
          // Check for timeout
-         if (portMillis() - startTime >= timeoutMs) {
+         if (self->htable->PortMillis() - startTime >= timeoutMs) {
              return API_RECEIVE_ERROR_TIMEOUT_DATA;
          }
-         portDelay(1);  // Add a 1 ms delay to prevent busy-waiting
+         self->htable->PortDelay(1);  // Add a 1 ms delay to prevent busy-waiting
      }
  
      return API_RECEIVE_SUCCESS;
@@ -285,6 +285,7 @@
      uint16_t length = (length_bytes[0] << 8) | length_bytes[1];
      APIFrameDebugPrint("Frame length received: %d bytes\n", length);
  
+     //@todo: Dynamic size based on api frame length
      if (length > XBEE_MAX_FRAME_DATA_SIZE) {
          APIFrameDebugPrint("Error: Frame length exceeds buffer size.\n");
          return API_RECEIVE_ERROR_FRAME_TOO_LARGE;
@@ -357,6 +358,8 @@
              break;
          case XBEE_API_TYPE_LR_RX_PACKET:
          case XBEE_API_TYPE_LR_EXPLICIT_RX_PACKET:
+         case XBEE_API_TYPE_CELLULAR_SOCKET_RX:
+         case XBEE_API_TYPE_CELLULAR_SOCKET_RX_FROM:
              if(self->vtable->handleRxPacketFrame){
                  self->vtable->handleRxPacketFrame(self, &frame);
              }
@@ -382,12 +385,13 @@
   * @param[out] responseBuffer Pointer to a buffer where the AT command response will be stored.
   * @param[out] responseLength Pointer to a variable where the length of the response will be stored.
   * @param[in] timeoutMs The timeout period in milliseconds within which the response must be received.
+  * @param[in] responseBufferSize The maximum size of the response buffer.
   * 
   * @return int Returns 0 (`API_SEND_SUCCESS`) if the AT command is successfully sent and a valid response is received, 
   * or a non-zero error code if there is a failure (`API_SEND_AT_CMD_ERROR`, `API_SEND_AT_CMD_RESPONSE_TIMEOUT`, etc.).
   */
  int apiSendAtCommandAndGetResponse(XBee* self, at_command_t command, const uint8_t *parameter, uint8_t paramLength, uint8_t *responseBuffer, 
-     uint8_t *responseLength, uint32_t timeoutMs) {
+     uint8_t *responseLength, uint32_t timeoutMs, uint16_t responseBufferSize) {
      // Send the AT command using API frame
      apiSendAtCommand(self, command, (const uint8_t *)parameter, paramLength);
  
@@ -397,6 +401,12 @@
      // Wait and receive the response within the timeout period
      xbee_api_frame_t frame;
      int status;
+
+    const char* cmdStr = atCommandToString(command);
+     if (!cmdStr || strlen(cmdStr) != 2) {
+         APIFrameDebugPrint("Invalid AT command enum.\n");
+         return API_SEND_ERROR_INVALID_COMMAND;
+     }
  
      while (1) {
          // Attempt to receive the API frame
@@ -406,11 +416,23 @@
          if (status == 0) {
              // Check if the received frame is an AT response
              if (frame.type == XBEE_API_TYPE_AT_RESPONSE) {
- 
+                
+                // Verify response matches the requested AT command
+                 if (frame.data[2] != cmdStr[0] || frame.data[3] != cmdStr[1]) {
+                     APIFrameDebugPrint("Mismatched AT command response: expected %s, got %c%c\n",
+                         cmdStr, frame.data[2], frame.data[3]);
+                     continue; // Keep waiting
+                 }
+
                  // Extract the AT command response
                  *responseLength = frame.length - 5;  // Subtract the frame ID and AT command bytes
                  APIFrameDebugPrint("responseLength: %u\n", *responseLength);
                  if(frame.data[4] == 0){
+                    if (*responseLength > responseBufferSize) {
+                        APIFrameDebugPrint("Response exceeds buffer size: %u > %u\n", *responseLength, responseBufferSize);
+                        return API_SEND_AT_CMD_ERROR;
+                    }
+
                      if((responseBuffer != NULL) && (*responseLength)){
                          memcpy(responseBuffer, &frame.data[5], *responseLength);
                      }
@@ -439,6 +461,7 @@
  
  //Print out AT Response
  void xbeeHandleAtResponse(XBee* self, xbee_api_frame_t *frame) {
+    (void)self;
  #if API_FRAME_DEBUG_PRINT_ENABLED
      // The first byte of frame->data is the Frame ID
      uint8_t frame_id = frame->data[1];
@@ -472,6 +495,7 @@
  
  //Should be moved to be handled by user?
  void xbeeHandleModemStatus(XBee* self, xbee_api_frame_t *frame) {
+     (void)self;
      if (frame->type != XBEE_API_TYPE_MODEM_STATUS) return;
  
      APIFrameDebugPrint("Modem Status: %d\n", frame->data[1]);

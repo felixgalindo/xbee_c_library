@@ -1,0 +1,15 @@
+# --- output location ----------------------------------------
+OUTPUT_DIRECTORY  = docs          # <repo>/docs
+HTML_OUTPUT       = html          # final HTML will be docs/html
+
+# --- what to document ---------------------------------------
+INPUT             = src include examples
+RECURSIVE         = YES           # descend into sub-folders
+FILE_PATTERNS     = *.c *.h       # default is usually fine
+
+# --- optionally skip stuff ----------------------------------
+EXCLUDE           = build test
+
+# --- project meta -------------------------------------------
+PROJECT_NAME      = "XBee C Library"
+EXTRACT_ALL       = YES

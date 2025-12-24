@@ -6,7 +6,7 @@ This library provides a framework for interfacing with XBee modules using an XBe
 
 ### Currently Supported XBees
 - XBee LR (LoRaWAN)
-- More coming soon..
+- XBee 3 Cellular (LTE-M/NB-IoT)
 
 ### Library Structure
 - **src**: Contains the core source files implementing XBee classes and APIs.
@@ -51,7 +51,7 @@ This section provides an overview of the key methods available in the XBee class
 - `XBeeInit()`: Initializes the XBee module.
 - `XBeeConnect()`: Connects the XBee module to a network.
 - `XBeeDisconnect()`: Disconnects the XBee module from the network.
-- `XBeeSendData()`: Sends data through the XBee module.
+- `XBeeSendPacket()`: Sends data through the XBee module.
 - `XBeeSoftReset()`: Performs a soft reset on the XBee module.
 - `XBeeHardReset()`: Performs a hard reset on the XBee module.
 - `XBeeProcess()`: Processes incoming and outgoing data for the XBee module.
@@ -59,6 +59,34 @@ This section provides an overview of the key methods available in the XBee class
 - `XBeeWriteConfig()`: Writes configuration settings to the XBee module.
 - `XBeeApplyChanges()`: Applies changes to the configuration of the XBee module.
 - `XBeeLRSetApiOptions()`: Sets API options for long-range communication.
+
+---
+
+## XBee 3 Cellular Specific Methods
+
+The following methods are specific to the XBee 3 Cellular subclass and are **not inherited** from the parent `XBee` class:
+
+- `XBeeCellularCreate()`: Allocates and initializes an `XBeeCellular` instance with user-defined hardware and callback tables.
+- `XBeeCellularDestroy()`: Frees memory associated with an `XBeeCellular` instance.
+- `XBeeCellularConfigure()`: Applies APN, SIM PIN, and carrier profile settings to configure cellular behavior.
+- `XBeeCellularSocketCreate()`: Sends a SOCKET_CREATE frame to open a new socket.
+- `XBeeCellularSocketConnect()`: Connects a socket to a given remote address using DNS or IP.
+- `XBeeCellularSocketSend()`: Transmits binary data over a connected socket.
+- `XBeeCellularSocketSetOption()`: Configures socket parameters such as port binding or listen mode.
+- `XBeeCellularSocketClose()`: Closes a previously created socket by sending a SOCKET_CLOSE frame.
+- `XBeeCellularHandleRxPacket()`: Handles frame type `0xCD` (Socket Receive) and delivers received packets via the registered receive callback.
+
+---
+
+## XBee LR (LoRaWAN) Specific Methods
+
+The following methods are specific to the XBee LR (LoRaWAN) subclass and are **not inherited** from the parent `XBee` class:
+
+- `XBeeLRGetDevEUI()`: Reads and returns the LoRaWAN device EUI from the XBee module.
+- `XBeeLRSetAppEUI()`: Configures the Application EUI used for OTAA join.
+- `XBeeLRSetAppKey()`: Sets the AppKey for LoRaWAN OTAA authentication.
+- `XBeeLRSetNwkKey()`: Sets the Network Key used for network traffic encryption.
+- `XBeeLRSendPacket()`: Sends a LoRaWAN uplink packet using the LR frame interface.
 
 Each of these methods provides essential functionality for managing and communicating with XBee devices within a network. Ensure that you refer to these methods when developing applications that involve XBee modules.
 
@@ -142,7 +170,7 @@ After creating the XBee LR instance, initialize the XBee LR module, configure th
 
 ### Sending Data
 
-To send data over the XBee LR network, use the `XBeeLRSendData` method. Here's an example of preparing and sending a payload:
+To send data over the XBee LR network, use the `XBeeLRSendPacket` method. Here's an example of preparing and sending a payload:
 
 ```c
 // XBeeLR payload to send
@@ -155,7 +183,7 @@ XBeeLRPacket_t packet = {
     .ack = 0,
 };
 
-if (!XBeeSendData(myXbeeLr, &packet)) {
+if (!XBeeSendPacket(myXbeeLr, &packet)) {
     printf("Failed to send data.");
 } else {
     printf("Data sent successfully.");
@@ -279,7 +307,7 @@ int main() {
         .ack = 0,
     };
 
-    if (!XBeeSendData(myXbeeLr, &packet)) {
+    if (!XBeeSendPacket(myXbeeLr, &packet)) {
         printf("Failed to send data.");
     } else {
         printf("Data sent successfully.");
